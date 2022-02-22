@@ -7,7 +7,11 @@ const app = new Koa()
 const routing = require('./routes')
 const { connectionStr } = require('./config')
 
-mongoose.connect(connectionStr)
+mongoose.connect(connectionStr, () => {
+  console.log('mongodb连接成功！')
+})
+mongoose.connection.on('error', console.error)
+
 app.use(error({
   postFormat: (err, { stack, ...reset }) => process.env.NODE_ENV === 'production'
     ? reset : { stack, ...reset }

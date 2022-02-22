@@ -1,6 +1,5 @@
 class HomeCtl {
   index (ctx) {
-    a
     ctx.body = 'home page'
   }
 }
