@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const UserModel = require('../models/users')
+const AnswerModel = require('../models/answers')
 const { secret } = require('../config')
 
 class UserCtl {
@@ -160,6 +161,88 @@ class UserCtl {
   async listQuestions (ctx) {
     const questions = await UserModel.find({ questioner: ctx.params.id })
     ctx.body = questions
+  }
+  // 用户点赞的答案列表
+  async listLikingAnswers (ctx) {
+    const user = await UserModel.findById(ctx.state.user._id).select('+linkingAnswers').populate('linkingAnswers')
+    if (!user) ctx.throw(404, 'user is not found')
+    ctx.body = user.linkingAnswers
+  }
+  // 喜欢某个答案   点赞 
+  async likeAnswer (ctx) {
+    const me = await UserModel.findById(ctx.state.user._id).select('+linkingAnswers')
+    let index = me.linkingAnswers.map(id => id.toString()).includes(ctx.params.id)
+    if (index != -1) {
+      me.linkingAnswers.push(ctx.params.id)
+      me.save()
+      // 修改某个id答案的 喜欢 次数
+      await AnswerModel.findByIdAndUpdate(ctx.params.id, { $inc: { voteCount: 1 } })
+    }
+    ctx.status = 204
+  }
+  // 取消对某个答案的喜欢
+  async unlikeAnswer (ctx) {
+    const me = await UserModel.findById(ctx.state.user._id).select('+linkingAnswers')
+    let index = me.linkingAnswers.map(id => id.toString()).includes(ctx.params.id)
+    if (index != -1) {
+      me.linkingAnswers.splice(index, 1)
+      me.save()
+      // 修改某个id答案的 喜欢 次数
+      await AnswerModel.findByIdAndUpdate(ctx.params.id, { $inc: { voteCount: -1 } })
+    }
+    ctx.status = 204
+  }
+  // 用户踩的答案列表
+  async listDisLikingAnswers (ctx) {
+    const user = await UserModel.findById(ctx.state.user._id).select('+disLinkingAnswers').populate('disLinkingAnswers')
+    if (!user) ctx.throw(404, 'user is not found')
+    ctx.body = user.disLinkingAnswers
+  }
+  async disLikeAnswer (ctx) {
+    const me = await UserModel.findById(ctx.state.user._id).select('+disLinkingAnswers')
+    let index = me.disLinkingAnswers.map(id => id.toString()).includes(ctx.params.id)
+    if (index != -1) {
+      me.disLinkingAnswers.push(ctx.params.id)
+      me.save()
+    }
+    ctx.status = 204
+  }
+  // 取消对某个答案的踩
+  async unDisLikeAnswer (ctx) {
+    const me = await UserModel.findById(ctx.state.user._id).select('+linkingAnswers')
+    let index = me.linkingAnswers.map(id => id.toString()).includes(ctx.params.id)
+    if (index != -1) {
+      me.linkingAnswers.splice(index, 1)
+      me.save()
+    }
+    ctx.status = 204
+  }
+  // 所有收藏的答案
+  async listCollectionAnswers (ctx) {
+    const user = await UserModel.findById(ctx.state.user._id).select('+collectionAnswers').populate('collectionAnswers')
+    if (!user) ctx.throw(404, 'user is not found')
+    ctx.body = user.collectionAnswers
+  }
+  // 收藏某个答案
+  async collectAnswer (ctx) {
+    const me = await UserModel.findById(ctx.state.user._id).select('+collectionAnswers')
+    let index = me.collectionAnswers.map(id => id.toString()).includes(ctx.params.id)
+    if (index != -1) {
+      me.collectionAnswers.push(ctx.params.id)
+      me.save()
+      // 修改某个id答案的 喜欢 次数
+    }
+    ctx.status = 204
+  }
+  // 取消对某个答案的喜欢
+  async unCollectAnswer (ctx) {
+    const me = await UserModel.findById(ctx.state.user._id).select('+collectionAnswers')
+    let index = me.collectionAnswers.map(id => id.toString()).includes(ctx.params.id)
+    if (index != -1) {
+      me.collectionAnswers.splice(index, 1)
+      me.save()
+    }
+    ctx.status = 204
   }
 }
 

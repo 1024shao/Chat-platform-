@@ -37,6 +37,17 @@ const userSchema = new Schema({
   followTopics: {
     type: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
     select: false
+  },
+  linkingAnswers: {
+    type: [{ type: Schema.Types.ObjectId, ref: "Answer" }]
+  },
+  disLinkingAnswers: {
+    type: [{ type: Schema.Types.ObjectId, ref: "Answer" }]
+  },
+  //收藏
+  collectionAnswers: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'Answer' }],
+    select: false
   }
 })
 
