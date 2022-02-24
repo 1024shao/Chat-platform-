@@ -1,5 +1,5 @@
 const TopicModel = require('../models/topics')
-
+const QuestionModel = require('../models/questions')
 class TopicsCtl {
   async find (ctx) { //查询所有话题
     //分页处理
@@ -54,6 +54,10 @@ class TopicsCtl {
     })
     const topic = await TopicModel.findByIdAndUpdate(ctx.params.id, ctx.request.body)
     ctx.body = topic
+  }
+  async listQuestions (ctx) {
+    const questions = await QuestionModel.find({ topics: ctx.params.id })
+    ctx.body = questions
   }
 
 }

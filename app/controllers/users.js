@@ -157,6 +157,10 @@ class UserCtl {
     }
     ctx.status = 204
   }
+  async listQuestions (ctx) {
+    const questions = await UserModel.find({ questioner: ctx.params.id })
+    ctx.body = questions
+  }
 }
 
 
